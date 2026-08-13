@@ -1,53 +1,22 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"; // หรือสร้าง wrapper จาก next-themes
-
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata } from 'next'
+import './globals.css'
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: "Campus Marketplace",
-  description: "ตลาดนัดออนไลน์สำหรับนักศึกษา";
-};
+  title: 'Campus Marketplace',
+  description: 'ตลาดออนไลน์สำหรับนักเรียนนักศึกษา',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return; (
+  return (
     <html lang="th" suppressHydrationWarning>
-      <body className={`${inter.className} bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300 min-h-screen`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+      <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200">
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
-}import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Campus Marketplace",
-  description: "ตลาดยกออนไลน์สำหรับนักศึกษา",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="th" suppressHydrationWarning>
-      <body className={`${inter.className} bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300 min-h-screen`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  );
 }
