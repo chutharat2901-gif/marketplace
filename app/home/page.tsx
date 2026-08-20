@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Sparkles, PlusCircle, Compass, Home, Layers, Box } from 'lucide-react'
+import { Search, Sparkles, PlusCircle, Compass, Home, Box } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export default function HomePage() {
@@ -32,7 +32,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* 1. Immersive 3D/Glass Card (ใช้ CSS Pure + Lucide Icon) */}
+      {/* 3D Immersive Card */}
       <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white shadow-xl border border-indigo-500/30 my-4 group">
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
@@ -49,7 +49,6 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* 3D Box Element */}
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500/30 to-purple-500/30 backdrop-blur-xl border border-white/20 shadow-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500">
             <Box size={32} className="text-indigo-300 drop-shadow-[0_0_10px_rgba(99,102,241,0.8)] animate-bounce" />
           </div>
@@ -90,7 +89,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 2. Experimental Floating Navigation Dock (ใช้ TailWind Pure) */}
+      {/* Experimental Floating Dock */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 w-full max-w-xs px-4">
         <nav className="flex items-center justify-around p-2.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl shadow-indigo-500/10">
           <Link
