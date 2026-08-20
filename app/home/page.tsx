@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Search, Sparkles, PlusCircle, Compass, Home, Box } from 'lucide-react'
-import ThemeToggle from '@/components/ThemeToggle'
 
 export default function HomePage() {
   return (
@@ -15,10 +14,6 @@ export default function HomePage() {
             <Sparkles className="text-indigo-600 dark:text-indigo-400" size={20} />
             Campus Market
           </h1>
-          
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-          </div>
         </div>
 
         {/* Search Bar */}
