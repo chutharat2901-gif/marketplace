@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import {
   Search,
   Bookmark,
@@ -15,6 +16,9 @@ import {
   Package,
   QrCode,
   PhoneCall,
+  LogIn,
+  PlusCircle,
+  Image as ImageIcon,
 } from 'lucide-react'
 
 interface Product {
@@ -41,7 +45,7 @@ const CATEGORIES = [
   'ของใช้ & กระเป๋า',
 ]
 
-const PRODUCTS: Product[] = [
+const INITIAL_PRODUCTS: Product[] = [
   {
     id: 1,
     title: 'iPad Air 5 (M1) 64GB Wi-Fi + Apple Pencil 2',
@@ -75,7 +79,7 @@ const PRODUCTS: Product[] = [
     title: 'หนังสือชีทสรุป แคลคูลัส 1 & 2 + ข้อสอบเก่าพร้อมเฉลย',
     seller: 'ชมรมวิชาการ',
     sellerContact: 'FB: Academic Club',
-    condition: 'ฉบับปรับปรุงใหม่',
+    condition: 'ฉบับปรับปรุงใหม่ 2026',
     price: '150 บาท',
     category: 'หนังสือ & เอกสารเรียน',
     tag: 'Best Seller',
@@ -84,42 +88,26 @@ const PRODUCTS: Product[] = [
     description: 'สรุปสูตรลับ และลายมือจดละเอียด อ่านเข้าใจง่าย ปูพื้นฐานแน่น เหมาะสำหรับคนเตรียมสอบกลางภาค',
     location: 'ลานไทร หน้าลานกิจกรรม',
   },
-  {
-    id: 4,
-    title: 'เซ็ตสมุดสันห่วง A5 (กระดาษถนอมสายตา 80 แกรม)',
-    seller: 'ร้านเครื่องเขียนคุณป้า',
-    sellerContact: 'โทร 089-XXX-XXXX',
-    condition: 'ของใหม่ 100%',
-    price: '89 บาท (แพ็ก 3 เล่ม)',
-    category: 'เครื่องเขียน & สมุด',
-    tag: 'สุดคุ้ม',
-    rating: 4.7,
-    imageUrl: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80',
-    description: 'สมุดบันทึกแบบตารางกริด หมึกไม่ซึม เขียนง่าย เหมาะจดเลกเชอร์หรือทำ Bullet Journal',
-    location: 'บูธเครื่องเขียน 12',
-  },
-  {
-    id: 5,
-    title: 'กระเป๋าใส่ iPad กันกระแทก (ใส่ iPad Pro 11 / Air 5 ได้)',
-    seller: 'Shop.Campus',
-    sellerContact: 'IG: shop_campus',
-    condition: 'ของใหม่ พร้อมส่ง',
-    price: '250 บาท',
-    category: 'ของใช้ & กระเป๋า',
-    tag: 'สไตล์มินิมอล',
-    rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
-    description: 'ผ้ากันน้ำ มีช่องเก็บปากกา Apple Pencil และสายชาร์จแยกต่างหาก บุฟองน้ำกันกระแทกอย่างดี',
-    location: 'ซุ้มแฟชั่น ถนนคนเดินวิทยาลัย',
-  },
 ]
 
 export default function CampusMarketPage() {
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS)
   const [activeCategory, setActiveCategory] = useState('ทั้งหมด')
   const [searchQuery, setSearchQuery] = useState('')
   const [savedItems, setSavedItems] = useState<number[]>([])
   const [currentTab, setCurrentTab] = useState<'market' | 'explore' | 'saved'>('market')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  
+  // Modal state สำหรับหน้าลงขาย
+  const [isSellModalOpen, setIsSellModalOpen] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newPrice, setNewPrice] = useState('')
+  const [newCategory, setNewCategory] = useState('iPad & Gadgets')
+  const [newSeller, setNewSeller] = useState('')
+  const [newContact, setNewContact] = useState('')
+  const [newLocation, setNewLocation] = useState('')
+  const [newDescription, setNewDescription] = useState('')
+  const [newImageUrl, setNewImageUrl] = useState('')
 
   const toggleSave = useCallback((id: number, e?: React.MouseEvent) => {
     e?.stopPropagation()
@@ -130,13 +118,47 @@ export default function CampusMarketPage() {
 
   const closeModal = useCallback(() => {
     setSelectedProduct(null)
+    setIsSellModalOpen(false)
   }, [])
+
+  // ฟังก์ชันเพิ่มสินค้าใหม่ลงในระบบ
+  const handleAddProduct = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const newProduct: Product = {
+      id: Date.now(),
+      title: newTitle,
+      price: newPrice.includes('บาท') ? newPrice : `${newPrice} บาท`,
+      category: newCategory,
+      seller: newSeller || 'นักศึกษา (ไม่ระบุชื่อ)',
+      sellerContact: newContact,
+      location: newLocation || 'นัดรับภายในวิทยาลัย',
+      description: newDescription || 'ไม่มีรายละเอียดเพิ่มเติม',
+      condition: 'มือสอง/พร้อมส่ง',
+      tag: 'สินค้าใหม่',
+      rating: 5.0,
+      imageUrl: newImageUrl || 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80',
+    }
+
+    setProducts([newProduct, ...products])
+    
+    // Reset Form & Close Modal
+    setNewTitle('')
+    setNewPrice('')
+    setNewSeller('')
+    setNewContact('')
+    setNewLocation('')
+    setNewDescription('')
+    setNewImageUrl('')
+    setIsSellModalOpen(false)
+    alert('ลงขายสินค้าเรียบร้อยแล้ว!')
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeModal()
     }
-    if (selectedProduct) {
+    if (selectedProduct || isSellModalOpen) {
       document.body.style.overflow = 'hidden'
       window.addEventListener('keydown', handleKeyDown)
     }
@@ -144,9 +166,9 @@ export default function CampusMarketPage() {
       document.body.style.overflow = 'auto'
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [selectedProduct, closeModal])
+  }, [selectedProduct, isSellModalOpen, closeModal])
 
-  const filteredProducts = PRODUCTS.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const matchesCategory = activeCategory === 'ทั้งหมด' || product.category === activeCategory
     const matchesSearch =
       product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -157,7 +179,7 @@ export default function CampusMarketPage() {
     }
 
     if (currentTab === 'explore') {
-      return (product.rating >= 4.9 || product.tag.includes('ฮิต') || product.tag.includes('คุ้ม')) && matchesCategory && matchesSearch
+      return (product.rating >= 4.9 || product.tag.includes('ฮิต') || product.tag.includes('ใหม่')) && matchesCategory && matchesSearch
     }
 
     return matchesCategory && matchesSearch
@@ -165,15 +187,34 @@ export default function CampusMarketPage() {
 
   return (
     <div className="min-h-screen pb-32 max-w-xl mx-auto bg-[#F9F9FB] dark:bg-[#121316] text-[#1D1E20] dark:text-[#ECEEDF] font-sans transition-colors duration-500 relative border-x border-slate-200 dark:border-slate-800">
-      {/* Top Bar Accent */}
       <div className="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
 
       {/* Header */}
       <header className="px-5 pt-5 pb-4 space-y-3 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-[#F9F9FB]/95 dark:bg-[#121316]/95 backdrop-blur-md z-20">
         <div className="flex justify-between items-center">
-          <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full text-[10px] font-bold tracking-wider uppercase">
-            🟢 เปิดหน้าร้านปกติ • ไม่ต้องล็อกอิน
+          <span className="px-2.5 py-1 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-bold tracking-wider uppercase">
+            Campus Flea Market
           </span>
+
+          <div className="flex items-center gap-2">
+            {/* ปุ่มลงขาย */}
+            <button
+              onClick={() => setIsSellModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+            >
+              <PlusCircle size={14} />
+              <span>ลงขาย</span>
+            </button>
+
+            {/* ปุ่มเข้าสู่ระบบ */}
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-95 dark:bg-slate-100 dark:text-slate-900"
+            >
+              <LogIn size={14} />
+              <span>ล็อกอิน</span>
+            </Link>
+          </div>
         </div>
 
         <div>
@@ -181,11 +222,11 @@ export default function CampusMarketPage() {
             ตลาดนัดวิทยาลัย 🛍️
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            เลือกดูอุปกรณ์การเรียน iPad เครื่องเขียน และทักหาคนขายได้ทันที
+            ลงขายสินค้าฟรี หรือเลือกซื้ออุปกรณ์การเรียนมือสองราคานักศึกษา
           </p>
         </div>
 
-        {/* Search */}
+        {/* Search Input */}
         <div className="relative pt-1">
           <Search className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
           <input
@@ -199,7 +240,6 @@ export default function CampusMarketPage() {
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              aria-label="Clear Search"
             >
               <X size={14} />
             </button>
@@ -215,11 +255,11 @@ export default function CampusMarketPage() {
             <div className="space-y-1 z-10">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-[10px] font-bold tracking-wide uppercase backdrop-blur-md">
                 <Sparkles size={10} />
-                <span>ซื้อ-ขายตรง ไม่เสียค่าธรรมเนียม</span>
+                <span>เปิดแผงขายของฟรี!</span>
               </span>
-              <h2 className="text-base font-bold">เลือกสินค้าแล้วกดติดต่อคนขายได้เลย</h2>
+              <h2 className="text-base font-bold">มีชีทสรุปหรือของไม่ได้ใช้ไหม?</h2>
               <p className="text-[11px] text-blue-100 opacity-90">
-                นัดรับของที่ลานกิจกรรม หรือสแกนจ่ายหน้าซุ้มได้ทันที
+                กดปุ่ม "ลงขาย" มุมขวาบน เพื่อปล่อยต่อให้เพื่อนๆ ในวิทยาลัยได้เลย
               </p>
             </div>
             <QrCode className="w-12 h-12 text-white/30 shrink-0" />
@@ -272,18 +312,8 @@ export default function CampusMarketPage() {
               <p className="text-xs text-slate-500">
                 {currentTab === 'saved'
                   ? 'ยังไม่มีสินค้าที่คุณบันทึกไว้'
-                  : 'ไม่พบสินค้าที่คุณค้นหา ลองเปลี่ยนคำค้นดูนะ'}
+                  : 'ยังไม่มีรายการสินค้าในหมวดหมู่นี้'}
               </p>
-              <button
-                onClick={() => {
-                  setActiveCategory('ทั้งหมด')
-                  setSearchQuery('')
-                  setCurrentTab('market')
-                }}
-                className="text-xs text-blue-600 dark:text-blue-400 font-bold underline"
-              >
-                ดูสินค้าทั้งหมดในตลาด
-              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
@@ -294,7 +324,6 @@ export default function CampusMarketPage() {
                     key={product.id}
                     className="group relative border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 bg-white dark:bg-[#1A1B1E] hover:shadow-lg transition-all duration-300 flex gap-3.5 items-center"
                   >
-                    {/* Image */}
                     <div
                       onClick={() => setSelectedProduct(product)}
                       className="w-24 h-24 shrink-0 relative rounded-xl overflow-hidden cursor-pointer bg-slate-100 dark:bg-slate-800"
@@ -310,7 +339,6 @@ export default function CampusMarketPage() {
                       </div>
                     </div>
 
-                    {/* Details */}
                     <div className="flex-1 space-y-1 pr-5">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
@@ -346,17 +374,11 @@ export default function CampusMarketPage() {
                       </div>
                     </div>
 
-                    {/* Save Button */}
                     <button
                       onClick={(e) => toggleSave(product.id, e)}
                       className="absolute top-3.5 right-3.5 p-1 text-slate-400 hover:text-blue-600 transition-colors"
-                      aria-label={isSaved ? 'ยกเลิกการเซฟ' : 'เซฟสินค้า'}
                     >
-                      {isSaved ? (
-                        <Check size={18} className="text-emerald-500" />
-                      ) : (
-                        <Bookmark size={18} />
-                      )}
+                      {isSaved ? <Check size={18} className="text-emerald-500" /> : <Bookmark size={18} />}
                     </button>
                   </div>
                 )
@@ -366,20 +388,155 @@ export default function CampusMarketPage() {
         </div>
       </main>
 
-      {/* Modal View Detail */}
+      {/* MODAL 1: ป๊อปอัปฟอร์ม "ลงขายสินค้า" */}
+      {isSellModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4 my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+            >
+              <X size={18} />
+            </button>
+
+            <div>
+              <h3 className="text-lg font-bold">ลงขายสินค้าในตลาดนัด 📦</h3>
+              <p className="text-xs text-slate-500">กรอกรายละเอียดเพื่อปล่อยต่อให้เพื่อนในวิทยาลัย</p>
+            </div>
+
+            <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300">ชื่อสินค้า / อุปกรณ์ *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="เช่น iPad Air 4 64GB / หนังสือแคล 1"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">ราคา (บาท) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="เช่น 350 หรือ 12,000"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">หมวดหมู่ *</label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  >
+                    {CATEGORIES.filter((c) => c !== 'ทั้งหมด').map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">ชื่อผู้ขาย/คณะ *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="เช่น นัท (นิเทศ ปี 2)"
+                    value={newSeller}
+                    onChange={(e) => setNewSeller(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">เบอร์/Line ติดต่อ *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Line: nut_nited"
+                    value={newContact}
+                    onChange={(e) => setNewContact(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300">จุดนัดรับสินค้า *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="เช่น หน้าตึกเรียนรวม / ใต้ตึกกิจกรรม"
+                  value={newLocation}
+                  onChange={(e) => setNewLocation(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300">ลิงก์รูปภาพสินค้า (Optional)</label>
+                <div className="relative">
+                  <ImageIcon size={14} className="absolute left-3 top-3 text-slate-400" />
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300">รายละเอียดสินค้าเพิ่มเติม</label>
+                <textarea
+                  rows={2}
+                  placeholder="เช่น สภาพ 90%, อุปกรณ์ครบกล่อง, พิมพ์ใหม่..."
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 active:scale-[0.99] pt-2"
+              >
+                ยืนยันลงขายสินค้า
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: ดูรายละเอียดสินค้า */}
       {selectedProduct && (
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4 animate-in fade-in zoom-in duration-200"
+            className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-              aria-label="Close modal"
+              className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             >
               <X size={18} />
             </button>
@@ -411,7 +568,7 @@ export default function CampusMarketPage() {
               </div>
               <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-200 dark:border-slate-800 space-y-1">
                 <div>📍 <b>จุดนัดรับ:</b> {selectedProduct.location}</div>
-                <div>📞 <b>ช่องทางติดต่อผู้ขาย:</b> {selectedProduct.sellerContact}</div>
+                <div>📞 <b>ช่องทางติดต่อ:</b> {selectedProduct.sellerContact}</div>
               </div>
             </div>
 
@@ -438,7 +595,7 @@ export default function CampusMarketPage() {
                   className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-md shadow-blue-500/20"
                 >
                   <PhoneCall size={14} />
-                  <span>ติดต่อผู้ขาย</span>
+                  <span>ติดต่อคนขาย</span>
                 </button>
               </div>
             </div>
@@ -446,7 +603,7 @@ export default function CampusMarketPage() {
         </div>
       )}
 
-      {/* Bottom Nav */}
+      {/* Navigation Bar */}
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 w-full max-w-xs px-4">
         <nav className="flex items-center justify-around py-3 px-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-full shadow-2xl">
           <button
@@ -466,7 +623,7 @@ export default function CampusMarketPage() {
             }`}
           >
             <Sparkles size={16} />
-            <span className="text-[9px]">ฮิต/คุ้มค่า</span>
+            <span className="text-[9px]">ฮิต/มาใหม่</span>
           </button>
 
           <button
