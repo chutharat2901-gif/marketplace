@@ -1,5 +1,5 @@
 'use client'
-
+import Product3DCard from '@/components/Product3DCard'
 import { useState, useEffect, useCallback } from 'react'
 import {
   Search,
@@ -163,6 +163,17 @@ export default function CampusMarketPage() {
       product.seller.toLowerCase().includes(searchQuery.toLowerCase())
     
     if (currentTab === 'saved') {
+      <div className="grid grid-cols-1 gap-4">
+  {filteredProducts.map((product) => (
+    <Product3DCard
+      key={product.id}
+      product={product}
+      isSaved={savedItems.includes(product.id)}
+      onToggleSave={toggleSave}
+      onSelect={setSelectedProduct}
+    />
+  ))}
+</div>
       return savedItems.includes(product.id) && matchesCategory && matchesSearch
     }
 
