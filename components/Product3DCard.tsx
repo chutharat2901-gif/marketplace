@@ -1,17 +1,18 @@
 'use client'
 
 import { useState, useRef, MouseEvent } from 'react'
-import { Heart, ShoppingBag, Star, Cake, Sparkles, Check } from 'lucide-react'
+import { Heart, ShoppingBag, Star, Cake, Sparkles } from 'lucide-react'
 
+// ปรับแต่ง interface ให้เป็น Optional Types (?) เพื่อป้องกัน Type Error
 export interface Product {
   id: number
   title: string
-  seller: string
-  sellerContact: string
-  condition: string
+  seller?: string
+  sellerContact?: string
+  condition?: string
   price: string
-  category: string
-  tag: string
+  category?: string
+  tag?: string
   rating?: number
   image?: string
   description?: string
@@ -37,7 +38,7 @@ export default function Product3DCard({
   const [selectedSize, setSelectedSize] = useState<'1ปอนด์' | '2ปอนด์'>('1ปอนด์')
   const [customText, setCustomText] = useState('')
 
-  // คำนวณเอฟเฟกต์ 3D
+  // คำนวณเอฟเฟกต์ 3D Tilt
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
@@ -115,7 +116,9 @@ export default function Product3DCard({
         <div className="space-y-3">
           <div>
             <h3 className="font-bold text-lg text-zinc-800 dark:text-zinc-100 line-clamp-1">{product.title}</h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">เชฟผู้เชี่ยวชาญ: {product.seller}</p>
+            {product.seller && (
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">เชฟผู้เชี่ยวชาญ: {product.seller}</p>
+            )}
           </div>
 
           {/* เลือกขนาดเค้ก */}
