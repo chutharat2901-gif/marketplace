@@ -270,7 +270,7 @@ export default function SweetBakeryPage() {
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
-                      type="tel"
+                      type="tel" 
                       required
                       placeholder="เบอร์โทรศัพท์..."
                       value={customerPhone}
