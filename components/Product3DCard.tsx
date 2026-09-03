@@ -3,6 +3,7 @@
 import { useState, useRef, MouseEvent } from 'react'
 import { Heart, ShoppingBag, Star, Sparkles } from 'lucide-react'
 
+// Export ทั้ง Product และ CakeProduct เพื่อรองรับการเรียกใช้งานทุกรูปแบบ
 export interface Product {
   id: number
   title: string
@@ -14,6 +15,8 @@ export interface Product {
   description: string
   flavors: string[]
 }
+
+export type CakeProduct = Product
 
 interface Product3DCardProps {
   product: Product
@@ -41,7 +44,7 @@ export default function Product3DCard({
   const [selectedFlavor, setSelectedFlavor] = useState(product.flavors[0] || 'คลาสสิก')
   const [customText, setCustomText] = useState('')
 
-  // คำนวณ 3D Tilt Angle
+  // คำนวณ 3D Perspective Tilt
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
@@ -87,7 +90,7 @@ export default function Product3DCard({
           </button>
         </div>
 
-        {/* 3D Image Card */}
+        {/* 3D Image Display & Text Preview */}
         <div className="relative h-52 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50 dark:from-zinc-900 dark:to-rose-950 flex items-center justify-center group mb-4">
           <div
             style={{ transform: `translateZ(${isHovered ? '45px' : '0px'})` }}
