@@ -1,5 +1,4 @@
 'use client'
-import Product3DCard from '@/components/Product3DCard'
 import { useState, useEffect, useCallback } from 'react'
 import {
   Search,
@@ -12,9 +11,6 @@ import {
   Star,
   ShoppingBag,
   Eye,
-  Tablet,
-  MousePointer,
-  PenTool,
   Package,
   QrCode,
 } from 'lucide-react'
@@ -80,7 +76,7 @@ const PRODUCTS: Product[] = [
     tag: 'Best Seller',
     rating: 5.0,
     imageUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80',
-    description: 'สรุปสูตรลับ และลายมือจดละเอียด อ่านเข้าใจง่าย ปูพื้นฐานแน่น เหมาะสำหรับคนเตรียมสอบกลางภาค',
+    description: 'สรุปสูตรลับ และลายมือจดรายละเอียด อ่านเข้าใจง่าย ปูพื้นฐานแน่น เหมาะสำหรับคนเตรียมสอบกลางภาค',
     location: 'ลานไทร หน้าลานกิจกรรม',
   },
   {
@@ -161,19 +157,8 @@ export default function CampusMarketPage() {
     const matchesSearch =
       product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.seller.toLowerCase().includes(searchQuery.toLowerCase())
-    
+
     if (currentTab === 'saved') {
-      <div className="grid grid-cols-1 gap-4">
-  {filteredProducts.map((product) => (
-    <Product3DCard
-      key={product.id}
-      product={product}
-      isSaved={savedItems.includes(product.id)}
-      onToggleSave={toggleSave}
-      onSelect={setSelectedProduct}
-    />
-  ))}
-</div>
       return savedItems.includes(product.id) && matchesCategory && matchesSearch
     }
 
@@ -186,7 +171,6 @@ export default function CampusMarketPage() {
 
   return (
     <div className="min-h-screen pb-32 max-w-xl mx-auto bg-[#F9F9FB] dark:bg-[#121316] text-[#1D1E20] dark:text-[#ECEEDF] font-sans transition-colors duration-500 relative border-x border-slate-200 dark:border-slate-800">
-      {/* Header Bar */}
       <div className="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
 
       <header className="px-5 pt-5 pb-4 space-y-3 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-[#F9F9FB]/95 dark:bg-[#121316]/95 backdrop-blur-md z-20">
@@ -208,7 +192,6 @@ export default function CampusMarketPage() {
           </p>
         </div>
 
-        {/* Search Box */}
         <div className="relative pt-1">
           <Search className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
           <input
@@ -231,7 +214,6 @@ export default function CampusMarketPage() {
       </header>
 
       <main className="px-5 py-5 space-y-6">
-        {/* Banner Announcement */}
         {currentTab !== 'saved' && (
           <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md flex items-center justify-between">
             <div className="space-y-1 z-10">
@@ -248,7 +230,6 @@ export default function CampusMarketPage() {
           </div>
         )}
 
-        {/* Categories */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
             <span>หมวดหมู่สินค้า</span>
@@ -276,7 +257,6 @@ export default function CampusMarketPage() {
           </div>
         </div>
 
-        {/* Product Cards */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
@@ -316,7 +296,6 @@ export default function CampusMarketPage() {
                     key={product.id}
                     className="group relative border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 bg-white dark:bg-[#1A1B1E] hover:shadow-lg transition-all duration-300 flex gap-3.5 items-center"
                   >
-                    {/* Product Image */}
                     <div
                       onClick={() => setSelectedProduct(product)}
                       className="w-24 h-24 shrink-0 relative rounded-xl overflow-hidden cursor-pointer bg-slate-100 dark:bg-slate-800"
@@ -332,7 +311,6 @@ export default function CampusMarketPage() {
                       </div>
                     </div>
 
-                    {/* Product Info */}
                     <div className="flex-1 space-y-1 pr-5">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
@@ -368,7 +346,6 @@ export default function CampusMarketPage() {
                       </div>
                     </div>
 
-                    {/* Bookmark Button */}
                     <button
                       onClick={(e) => toggleSave(product.id, e)}
                       className="absolute top-3.5 right-3.5 p-1 text-slate-400 hover:text-blue-600 transition-colors"
@@ -388,7 +365,6 @@ export default function CampusMarketPage() {
         </div>
       </main>
 
-      {/* Product Detail Modal */}
       {selectedProduct && (
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
@@ -398,7 +374,6 @@ export default function CampusMarketPage() {
             className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4 animate-in fade-in zoom-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Close Button */}
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
@@ -467,7 +442,6 @@ export default function CampusMarketPage() {
         </div>
       )}
 
-      {/* Floating Bottom Navigation */}
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 w-full max-w-xs px-4">
         <nav className="flex items-center justify-around py-3 px-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-full shadow-2xl">
           <button
