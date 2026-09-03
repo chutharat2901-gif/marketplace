@@ -1,485 +1,308 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+
+import { useState } from 'react'
+import Product3DCard, { CakeProduct } from '@/components/Product3DCard'
 import {
-  Search,
-  Bookmark,
-  Sparkles,
-  BookOpen,
-  ArrowUpRight,
-  Check,
-  X,
-  Star,
+  Cake,
   ShoppingBag,
-  Eye,
-  Package,
-  QrCode,
+  Heart,
+  Search,
+  Sparkles,
+  Calendar,
+  X,
+  CheckCircle2,
+  Phone,
+  Clock,
 } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
 
-interface Product {
-  id: number
-  title: string
-  seller: string
-  condition: string
-  price: string
-  category: string
-  tag: string
-  rating: number
-  imageUrl: string
-  description: string
-  location: string
-}
+const CATEGORIES = ['ทั้งหมด', 'สตรอว์เบอร์รี', 'ช็อกโกแลต', 'มินิมอลเกาหลี', 'พรีเมียมผลไม้', 'ชีสเค้ก']
 
-const CATEGORIES = [
-  'ทั้งหมด',
-  'iPad & Gadgets',
-  'อุปกรณ์ไอที',
-  'หนังสือ & เอกสารเรียน',
-  'เครื่องเขียน & สมุด',
-  'ของใช้ & กระเป๋า',
-]
-
-const PRODUCTS: Product[] = [
+const CAKE_PRODUCTS: CakeProduct[] = [
   {
     id: 1,
-    title: 'iPad Air 5 (M1) 64GB Wi-Fi + Apple Pencil 2',
-    seller: 'พี่เกรซ ปี 4 วิศวะ',
-    condition: 'สภาพ 95% สุขภาพแบต 91%',
-    price: '14,500 บาท',
-    category: 'iPad & Gadgets',
-    tag: 'หลุดจอง/ราคาดี',
+    title: 'Strawberry Shortcake ความรักหวานฉ่ำ',
+    price: 590,
+    category: 'สตรอว์เบอร์รี',
+    tag: 'ขายดีอันดับ 1',
     rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
-    description: 'แถมเคส magnetic และติดฟิล์มกระดาษเรียบร้อยแล้ว พร้อมกล่องและสายชาร์จแท้ นัดรับหน้าตึกกิจกรรมได้เลย',
-    location: 'ใต้ตึกกิจกรรมนักศึกษา (ซุ้ม B01)',
+    imageUrl: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
+    description: 'เนื้อสปันจ์เค้กนุ่มละมุน สลับชั้นครีมสดแท้จากฮอกไกโด และสตรอว์เบอร์รีสดลูกโต',
+    flavors: ['นมฮอกไกโด', 'วานิลลาฝรั่งเศส'],
   },
   {
     id: 2,
-    title: 'Logitech Pebble M350 เมาส์ไร้สาย เสียงเงียบ',
-    seller: 'คุณตั้ม คณะบริหาร',
-    condition: 'มือสอง สภาพดี 90%',
-    price: '390 บาท',
-    category: 'อุปกรณ์ไอที',
-    tag: 'ของมันต้องมี',
+    title: 'Dark Chocolate Truffle ช็อกโกแลตเข้มข้น',
+    price: 650,
+    category: 'ช็อกโกแลต',
+    tag: 'ช็อกโกแลตแท้ 70%',
     rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=600&q=80',
-    description: 'เชื่อมต่อผ่าน Bluetooth / USB Receiver ได้ น้ำหนักเบา เสียงคลิกเงียบมาก เหมาะอ่านหนังสือในห้องสมุด',
-    location: 'โซนไอที หน้าโรงอาหารกลาง',
+    imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
+    description: 'เค้กช็อกโกแลตฟัจด์เข้มข้น แต่งหน้าด้วยช็อกโกแลตทราฟเฟิลทำมือ อร่อยเข้มลงตัว',
+    flavors: ['ดาร์กช็อกโกแลต', 'มินต์ช็อกโกแลต'],
   },
   {
     id: 3,
-    title: 'หนังสือชีทสรุป แคลคูลัส 1 & 2 + ข้อสอบเก่าพร้อมเฉลย',
-    seller: 'ชมรมวิชาการ',
-    condition: 'พิมพ์ใหม่ 2026',
-    price: '150 บาท',
-    category: 'หนังสือ & เอกสารเรียน',
-    tag: 'Best Seller',
+    title: 'Korean Minimal Pastel Cake',
+    price: 490,
+    category: 'มินิมอลเกาหลี',
+    tag: 'ฮิตใน IG',
     rating: 5.0,
-    imageUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80',
-    description: 'สรุปสูตรลับ และลายมือจดรายละเอียด อ่านเข้าใจง่าย ปูพื้นฐานแน่น เหมาะสำหรับคนเตรียมสอบกลางภาค',
-    location: 'ลานไทร หน้าลานกิจกรรม',
+    imageUrl: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
+    description: 'เค้กแต่งสไตล์มินิมอลเกาหลี เลือกเขียนข้อความบอกความรู้สึกสุดพิเศษได้ตามใจชอบ',
+    flavors: ['วานิลลาบัตเตอร์', 'ชาไทยพรีเมียม', 'เอิร์ลเกรย์'],
   },
   {
     id: 4,
-    title: 'เซ็ตสมุดสันห่วง A5 (กระดาษถนอมสายตา 80 แกรม)',
-    seller: 'ร้านเครื่องเขียนคุณป้า',
-    condition: 'ของใหม่ 100%',
-    price: '89 บาท (แพ็ก 3 เล่ม)',
-    category: 'เครื่องเขียน & สมุด',
-    tag: 'สุดคุ้ม',
-    rating: 4.7,
-    imageUrl: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80',
-    description: 'สมุดบันทึกแบบตารางกริด หมึกไม่ซึม เขียนง่าย เหมาะจดเลกเชอร์หรือทำ Bullet Journal',
-    location: 'บูธเครื่องเขียน 12',
-  },
-  {
-    id: 5,
-    title: 'กระเป๋าใส่ iPad กันกระแทก (ใส่ iPad Pro 11 / Air 5 ได้)',
-    seller: 'Shop.Campus',
-    condition: 'ของใหม่ พร้อมส่ง',
-    price: '250 บาท',
-    category: 'ของใช้ & กระเป๋า',
-    tag: 'สไตล์มินิมอล',
+    title: 'Basque Burnt Cheesecake หน้าไหม้สูตรดั้งเดิม',
+    price: 520,
+    category: 'ชีสเค้ก',
+    tag: 'สูตรสเปนแท้',
     rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
-    description: 'ผ้ากันน้ำ มีช่องเก็บปากกา Apple Pencil และสายชาร์จแยกต่างหาก บุฟองน้ำกันกระแทกอย่างดี',
-    location: 'ซุ้มแฟชั่น ถนนคนเดินวิทยาลัย',
-  },
-  {
-    id: 6,
-    title: 'ปากกาไฮไลท์สีพาสเทล 6 สี (ไม่ซึมทะลุกระดาษ)',
-    seller: 'Stationery Corner',
-    condition: 'ของใหม่นำเข้า',
-    price: '65 บาท',
-    category: 'เครื่องเขียน & สมุด',
-    tag: 'ฮิตใน TikTok',
-    rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80',
-    description: 'สีหวานเนียนตา ไม่เข้มจนทับตัวหนังสือ หัวปากกาเน้นข้อความได้สองขนาด ความยาวใช้งานได้นาน',
-    location: 'บูธเครื่องเขียน 12',
+    imageUrl: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80',
+    description: 'ชีสเค้กหน้าไหม้เนื้อเนียนนุ่ม หอมกลิ่นกลมกล่อม ละลายในปาก',
+    flavors: ['ออริจินัลชีส', 'มัทฉะอุจิ'],
   },
 ]
 
-export default function CampusMarketPage() {
+interface CartItem {
+  product: CakeProduct
+  size: string
+  flavor: string
+  customText: string
+  totalPrice: number
+}
+
+export default function SweetBakeryPage() {
   const [activeCategory, setActiveCategory] = useState('ทั้งหมด')
   const [searchQuery, setSearchQuery] = useState('')
-  const [savedItems, setSavedItems] = useState<number[]>([])
-  const [currentTab, setCurrentTab] = useState<'market' | 'explore' | 'saved'>('market')
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [savedIds, setSavedIds] = useState<number[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isBookingSuccess, setIsBookingSuccess] = useState(false)
 
-  const toggleSave = useCallback((id: number, e?: React.MouseEvent) => {
-    e?.stopPropagation()
-    setSavedItems((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
-    )
-  }, [])
+  // Booking Form State
+  const [pickupDate, setPickupDate] = useState('')
+  const [customerName, setCustomerName] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
 
-  const closeModal = useCallback(() => {
-    setSelectedProduct(null)
-  }, [])
+  const toggleSave = (id: number) => {
+    setSavedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
+  }
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal()
-    }
-    if (selectedProduct) {
-      document.body.style.overflow = 'hidden'
-      window.addEventListener('keydown', handleKeyDown)
-    }
-    return () => {
-      document.body.style.overflow = 'auto'
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [selectedProduct, closeModal])
+  const handleAddToCart = (item: CartItem) => {
+    setCart((prev) => [...prev, item])
+    setIsCartOpen(true)
+  }
 
-  const filteredProducts = PRODUCTS.filter((product) => {
-    const matchesCategory = activeCategory === 'ทั้งหมด' || product.category === activeCategory
-    const matchesSearch =
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.seller.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleCheckout = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (cart.length === 0) return
+    setIsBookingSuccess(true)
+  }
 
-    if (currentTab === 'saved') {
-      return savedItems.includes(product.id) && matchesCategory && matchesSearch
-    }
-
-    if (currentTab === 'explore') {
-      return (product.rating >= 4.9 || product.tag.includes('ฮิต') || product.tag.includes('คุ้ม')) && matchesCategory && matchesSearch
-    }
-
-    return matchesCategory && matchesSearch
+  const filteredProducts = CAKE_PRODUCTS.filter((p) => {
+    const matchesCat = activeCategory === 'ทั้งหมด' || p.category === activeCategory
+    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCat && matchesSearch
   })
 
-  return (
-    <div className="min-h-screen pb-32 max-w-xl mx-auto bg-[#F9F9FB] dark:bg-[#121316] text-[#1D1E20] dark:text-[#ECEEDF] font-sans transition-colors duration-500 relative border-x border-slate-200 dark:border-slate-800">
-      <div className="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
+  const grandTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0)
 
-      <header className="px-5 pt-5 pb-4 space-y-3 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-[#F9F9FB]/95 dark:bg-[#121316]/95 backdrop-blur-md z-20">
+  return (
+    <div className="min-h-screen pb-24 max-w-xl mx-auto bg-rose-50/30 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 font-sans border-x border-rose-100 dark:border-rose-950">
+      {/* Top Banner Header */}
+      <header className="sticky top-0 z-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-pink-100 dark:border-pink-900/30 p-5 space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-bold tracking-wider uppercase">
-              Campus Flea Market
+            <Cake className="w-6 h-6 text-pink-500 animate-bounce" />
+            <span className="font-black text-lg bg-gradient-to-r from-pink-500 to-rose-600 bg-clip-text text-transparent">
+              Sweet Bakery Lounge
             </span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2.5 rounded-2xl bg-pink-50 dark:bg-pink-950/50 text-pink-600 dark:text-pink-300"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {cart.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            ตลาดนัดวิทยาลัย 🛍️
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            ไอแพด มือสอง เครื่องเขียน สรุปชีท และอุปกรณ์การเรียนราคานักศึกษา
-          </p>
-        </div>
-
-        <div className="relative pt-1">
-          <Search className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-3 text-pink-400" size={16} />
           <input
             type="text"
+            placeholder="ค้นหาเค้กวันเกิด, สตรอว์เบอร์รี, ชีสเค้ก..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ค้นหา ไอแพด, เมาส์, สมุดโน้ต, ปากกา..."
-            className="w-full pl-10 pr-9 py-2 bg-white dark:bg-[#1C1D21] border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 transition-all text-slate-800 dark:text-slate-100"
+            className="w-full pl-10 pr-4 py-2.5 bg-pink-50/40 dark:bg-zinc-800/50 border border-pink-200/60 dark:border-pink-900/40 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-pink-400"
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              aria-label="Clear Search"
-            >
-              <X size={14} />
-            </button>
-          )}
         </div>
       </header>
 
-      <main className="px-5 py-5 space-y-6">
-        {currentTab !== 'saved' && (
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md flex items-center justify-between">
-            <div className="space-y-1 z-10">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-[10px] font-bold tracking-wide uppercase backdrop-blur-md">
-                <Sparkles size={10} />
-                <span>สแกนจ่ายง่าย ไม่ต้องพกเงินสด</span>
-              </span>
-              <h2 className="text-base font-bold">ดีลเด็ดอุปกรณ์การเรียนวันนี้</h2>
-              <p className="text-[11px] text-blue-100 opacity-90">
-                พร้อมนัดรับตรงตึกกิจกรรม และลานไทรตลอดช่วงพักเที่ยง!
-              </p>
-            </div>
-            <QrCode className="w-12 h-12 text-white/30 shrink-0" />
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
-            <span>หมวดหมู่สินค้า</span>
-            {currentTab === 'saved' && (
-              <span className="text-blue-600 dark:text-blue-400">
-                บันทึกไว้ {savedItems.length} ชิ้น
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs font-medium ${
-                  activeCategory === cat
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-[#1C1D21] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+      <main className="p-5 space-y-6">
+        {/* Banner Promotion */}
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-pink-400 via-rose-400 to-amber-300 text-white shadow-xl shadow-pink-500/15 relative overflow-hidden">
+          <div className="space-y-1 z-10 relative">
+            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-extrabold uppercase backdrop-blur-md">
+              ✨ สั่งจองเค้กล่วงหน้า 1-2 วัน
+            </span>
+            <h2 className="text-xl font-black">เค้กโฮมเมด ทำสดใหม่ทุกวัน</h2>
+            <p className="text-xs text-pink-50">ฟรี! แต่งหน้าเค้กพิมพ์ข้อความสุดพิเศษ</p>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {currentTab === 'saved'
-                ? `รายการที่เซฟไว้ (${filteredProducts.length})`
-                : currentTab === 'explore'
-                ? `สินค้ายอดนิยม (${filteredProducts.length})`
-                : `สินค้าทั้งหมด (${filteredProducts.length})`}
-            </h3>
-          </div>
+        {/* Category List */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-2xl whitespace-nowrap text-xs font-bold transition-all ${
+                activeCategory === cat
+                  ? 'bg-pink-500 text-white shadow-md shadow-pink-500/20'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-pink-100 dark:border-zinc-800'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-14 space-y-3 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6">
-              <Package size={36} className="mx-auto text-slate-300 dark:text-slate-700" />
-              <p className="text-xs text-slate-500">
-                {currentTab === 'saved'
-                  ? 'ยังไม่มีสินค้าที่คุณบันทึกไว้'
-                  : 'ไม่พบสินค้าที่คุณค้นหา ลองเปลี่ยนคำค้นดูนะ'}
-              </p>
-              <button
-                onClick={() => {
-                  setActiveCategory('ทั้งหมด')
-                  setSearchQuery('')
-                  setCurrentTab('market')
-                }}
-                className="text-xs text-blue-600 dark:text-blue-400 font-bold underline"
-              >
-                ดูสินค้าทั้งหมดในตลาด
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {filteredProducts.map((product) => {
-                const isSaved = savedItems.includes(product.id)
-                return (
-                  <div
-                    key={product.id}
-                    className="group relative border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 bg-white dark:bg-[#1A1B1E] hover:shadow-lg transition-all duration-300 flex gap-3.5 items-center"
-                  >
-                    <div
-                      onClick={() => setSelectedProduct(product)}
-                      className="w-24 h-24 shrink-0 relative rounded-xl overflow-hidden cursor-pointer bg-slate-100 dark:bg-slate-800"
-                    >
-                      <img
-                        src={product.imageUrl}
-                        alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Eye size={18} className="text-white drop-shadow-md" />
-                      </div>
-                    </div>
-
-                    <div className="flex-1 space-y-1 pr-5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
-                          {product.tag}
-                        </span>
-                        <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold">
-                          <Star size={10} className="fill-amber-400 text-amber-400" />
-                          <span>{product.rating}</span>
-                        </div>
-                      </div>
-
-                      <h4
-                        onClick={() => setSelectedProduct(product)}
-                        className="font-bold text-sm leading-snug cursor-pointer line-clamp-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      >
-                        {product.title}
-                      </h4>
-
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        ผู้ขาย: <span className="font-medium text-slate-700 dark:text-slate-300">{product.seller}</span>
-                      </p>
-
-                      <div className="pt-1 flex items-center justify-between">
-                        <span className="text-sm font-black text-blue-600 dark:text-blue-400">
-                          {product.price}
-                        </span>
-                        <button
-                          onClick={() => setSelectedProduct(product)}
-                          className="flex items-center gap-0.5 text-[11px] text-slate-600 dark:text-slate-400 hover:text-blue-600 font-medium"
-                        >
-                          รายละเอียด <ArrowUpRight size={12} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={(e) => toggleSave(product.id, e)}
-                      className="absolute top-3.5 right-3.5 p-1 text-slate-400 hover:text-blue-600 transition-colors"
-                      aria-label={isSaved ? 'ยกเลิกการเซฟ' : 'เซฟสินค้า'}
-                    >
-                      {isSaved ? (
-                        <Check size={18} className="text-emerald-500" />
-                      ) : (
-                        <Bookmark size={18} />
-                      )}
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+        {/* 3D Product Cards List */}
+        <div className="grid grid-cols-1 gap-6">
+          {filteredProducts.map((cake) => (
+            <Product3DCard
+              key={cake.id}
+              product={cake}
+              isSaved={savedIds.includes(cake.id)}
+              onToggleSave={toggleSave}
+              onAddToCart={handleAddToCart}
+            />
+          ))}
         </div>
       </main>
 
-      {selectedProduct && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={closeModal}
-        >
-          <div
-            className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4 animate-in fade-in zoom-in duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-              aria-label="Close modal"
-            >
-              <X size={18} />
-            </button>
+      {/* Cart & Booking Modal */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-5 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+            <div className="flex justify-between items-center border-b border-pink-100 dark:border-zinc-800 pb-3">
+              <h3 className="font-black text-lg flex items-center gap-2">
+                <ShoppingBag className="text-pink-500" /> รายการสั่งจองเค้ก ({cart.length})
+              </h3>
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="p-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-            <div className="flex gap-4 items-start">
-              <img
-                src={selectedProduct.imageUrl}
-                alt={selectedProduct.title}
-                className="w-24 h-24 rounded-2xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-700"
-              />
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                  {selectedProduct.category}
-                </span>
-                <h3 className="text-base font-bold leading-tight">{selectedProduct.title}</h3>
-                <p className="text-xs text-slate-500">
-                  โดย: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedProduct.seller}</span>
+            {isBookingSuccess ? (
+              <div className="py-10 text-center space-y-4">
+                <CheckCircle2 size={64} className="mx-auto text-emerald-500 animate-bounce" />
+                <h4 className="text-xl font-black">สั่งจองเค้กสำเร็จแล้ว!</h4>
+                <p className="text-xs text-zinc-500">
+                  ขอบคุณคุณ <span className="font-bold text-pink-600">{customerName}</span> ทางร้านได้รับรายการสั่งจองเรียบร้อยแล้ว จะติดต่อกลับทางเบอร์ {customerPhone} เพื่อยืนยันคิวรับเค้กครับ
                 </p>
-                <div className="text-[11px] font-medium text-amber-600 dark:text-amber-400 pt-0.5">
-                  📌 {selectedProduct.condition}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-[#121316] p-3 rounded-xl space-y-1 text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
-              <div className="font-semibold text-slate-800 dark:text-slate-200">รายละเอียดสินค้า:</div>
-              <p className="leading-relaxed">{selectedProduct.description}</p>
-              <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-200 dark:border-slate-800 mt-2">
-                📍 จุดนัดรับ: <span className="font-medium text-slate-700 dark:text-slate-300">{selectedProduct.location}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <div>
-                <span className="text-[10px] text-slate-400 block uppercase font-bold">ราคาขาย</span>
-                <span className="text-xl font-black text-blue-600 dark:text-blue-400">
-                  {selectedProduct.price}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => toggleSave(selectedProduct.id, e)}
-                  className="p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs flex items-center gap-1 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <Bookmark size={16} />
-                </button>
-
                 <button
                   onClick={() => {
-                    alert(`ส่งข้อความหา "${selectedProduct.seller}" เรียบร้อยแล้ว! กรุณารอนัดรับสินค้าที่นัดหมาย`)
-                    closeModal()
+                    setCart([])
+                    setIsBookingSuccess(false)
+                    setIsCartOpen(false)
                   }}
-                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-md shadow-blue-500/20"
+                  className="w-full py-3 bg-pink-500 text-white rounded-2xl font-bold text-xs"
                 >
-                  <ShoppingBag size={14} />
-                  <span>ทักแชต / จองสินค้า</span>
+                  กลับสู่หน้าร้านค้า
                 </button>
               </div>
-            </div>
+            ) : cart.length === 0 ? (
+              <div className="py-12 text-center text-zinc-400 space-y-2">
+                <Cake size={40} className="mx-auto opacity-40" />
+                <p className="text-xs">ยังไม่มีรายการเค้กในตะกร้า</p>
+              </div>
+            ) : (
+              <form onSubmit={handleCheckout} className="space-y-4">
+                <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
+                  {cart.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 bg-pink-50/50 dark:bg-zinc-800/50 rounded-2xl flex justify-between items-center text-xs"
+                    >
+                      <div>
+                        <p className="font-bold text-zinc-800 dark:text-zinc-100">{item.product.title}</p>
+                        <p className="text-zinc-500 text-[10px]">
+                          ขนาด: {item.size} | รส: {item.flavor}
+                        </p>
+                        {item.customText && (
+                          <p className="text-pink-600 font-semibold text-[10px]">
+                            ข้อความ: "{item.customText}"
+                          </p>
+                        )}
+                      </div>
+                      <span className="font-black text-rose-600">฿{item.totalPrice.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Form Details */}
+                <div className="space-y-3 pt-3 border-t border-pink-100 dark:border-zinc-800">
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    ข้อมูลผู้สั่งจอง & วันรับเค้ก
+                  </h4>
+                  <input
+                    type="text"
+                    required
+                    placeholder="ชื่อผู้สั่งจอง..."
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="tel"
+                      required
+                      placeholder="เบอร์โทรศัพท์..."
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                      type="date"
+                      required
+                      value={pickupDate}
+                      onChange={(e) => setPickupDate(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2 font-black text-base">
+                  <span>ราคารวมทั้งหมด:</span>
+                  <span className="text-rose-600 text-xl">฿{grandTotal.toLocaleString()}</span>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-pink-500/30"
+                >
+                  ยืนยันการสั่งจองเค้ก
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
-
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 w-full max-w-xs px-4">
-        <nav className="flex items-center justify-around py-3 px-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-full shadow-2xl">
-          <button
-            onClick={() => setCurrentTab('market')}
-            className={`flex flex-col items-center gap-1 transition-opacity ${
-              currentTab === 'market' ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <BookOpen size={16} />
-            <span className="text-[9px]">หน้าแรก</span>
-          </button>
-
-          <button
-            onClick={() => setCurrentTab('explore')}
-            className={`flex flex-col items-center gap-1 transition-opacity ${
-              currentTab === 'explore' ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <Sparkles size={16} />
-            <span className="text-[9px]">ฮิต/คุ้มค่า</span>
-          </button>
-
-          <button
-            onClick={() => setCurrentTab('saved')}
-            className={`flex flex-col items-center gap-1 transition-opacity relative ${
-              currentTab === 'saved' ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <Bookmark size={16} />
-            <span className="text-[9px]">เซฟไว้</span>
-            {savedItems.length > 0 && (
-              <span className="absolute -top-1 -right-2 w-4 h-4 bg-blue-600 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
-                {savedItems.length}
-              </span>
-            )}
-          </button>
-        </nav>
-      </div>
     </div>
   )
 }
