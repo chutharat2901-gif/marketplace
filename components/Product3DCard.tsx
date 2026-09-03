@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, MouseEvent } from 'react'
-import { Heart, ShoppingBag, Star, Sparkles, Cake } from 'lucide-react'
+import { Heart, ShoppingBag, Star, Sparkles } from 'lucide-react'
 
-export interface CakeProduct {
+export interface Product {
   id: number
   title: string
   price: number
@@ -16,11 +16,11 @@ export interface CakeProduct {
 }
 
 interface Product3DCardProps {
-  product: CakeProduct
+  product: Product
   isSaved: boolean
   onToggleSave: (id: number, e?: MouseEvent) => void
   onAddToCart: (item: {
-    product: CakeProduct
+    product: Product
     size: string
     flavor: string
     customText: string
@@ -41,7 +41,7 @@ export default function Product3DCard({
   const [selectedFlavor, setSelectedFlavor] = useState(product.flavors[0] || 'คลาสสิก')
   const [customText, setCustomText] = useState('')
 
-  // คำนวณ 3D Perspective Tilt
+  // คำนวณ 3D Tilt Angle
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
@@ -74,7 +74,7 @@ export default function Product3DCard({
         }}
         className="relative bg-white/90 dark:bg-rose-950/40 backdrop-blur-xl rounded-3xl border border-pink-100 dark:border-pink-900/40 p-5 shadow-xl hover:shadow-2xl hover:shadow-pink-400/20 transition-shadow duration-300 flex flex-col justify-between"
       >
-        {/* Header Badge */}
+        {/* Header Tag */}
         <div className="flex justify-between items-center mb-3">
           <span className="px-3 py-1 text-[11px] font-bold rounded-full bg-pink-100 dark:bg-pink-900/60 text-pink-600 dark:text-pink-300 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" /> {product.tag}
@@ -87,7 +87,7 @@ export default function Product3DCard({
           </button>
         </div>
 
-        {/* 3D Image Display & Text Preview */}
+        {/* 3D Image Card */}
         <div className="relative h-52 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50 dark:from-zinc-900 dark:to-rose-950 flex items-center justify-center group mb-4">
           <div
             style={{ transform: `translateZ(${isHovered ? '45px' : '0px'})` }}
@@ -98,7 +98,6 @@ export default function Product3DCard({
               alt={product.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            {/* Real-time Text Overlay บนเค้ก */}
             {customText && (
               <div className="absolute bottom-3 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-semibold text-pink-600 dark:text-pink-300 max-w-[85%] truncate shadow-lg border border-pink-200 dark:border-pink-800 animate-pulse">
                 🎂 "{customText}"
@@ -111,7 +110,7 @@ export default function Product3DCard({
           </div>
         </div>
 
-        {/* Form Controls */}
+        {/* Detail Controls */}
         <div className="space-y-3">
           <div>
             <h3 className="font-extrabold text-lg text-zinc-800 dark:text-zinc-100 line-clamp-1">
@@ -164,7 +163,7 @@ export default function Product3DCard({
             </div>
           </div>
 
-          {/* เขียนข้อความหน้าเค้ก */}
+          {/* พิมพ์ข้อความบนหน้าเค้ก */}
           <input
             type="text"
             maxLength={25}
@@ -174,7 +173,7 @@ export default function Product3DCard({
             className="w-full px-3 py-2 text-xs rounded-xl bg-pink-50/50 dark:bg-zinc-800/60 border border-pink-100 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400 text-zinc-800 dark:text-zinc-200 placeholder-zinc-400"
           />
 
-          {/* Footer Price & Submit */}
+          {/* Price & Submit */}
           <div className="pt-3 flex items-center justify-between border-t border-pink-100 dark:border-zinc-800/80">
             <div>
               <span className="text-[10px] text-zinc-400 font-semibold block">ราคารวม</span>

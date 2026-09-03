@@ -1,319 +1,303 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import Product3DCard, { Product } from '@/components/Product3DCard'
 import {
-  Search,
   Cake,
-  Calendar,
-  Clock,
-  Sparkles,
   ShoppingBag,
-  Heart,
-  CheckCircle2,
-  Phone,
+  Search,
   X,
-  User,
-  MapPin
+  CheckCircle2,
 } from 'lucide-react'
+import ThemeToggle from '@/components/ThemeToggle'
 
-// ข้อมูลเมนูเค้กในร้าน
-const INITIAL_CAKES: Product[] = [
+const CATEGORIES = ['ทั้งหมด', 'สตรอว์เบอร์รี', 'ช็อกโกแลต', 'มินิมอลเกาหลี', 'พรีเมียมผลไม้', 'ชีสเค้ก']
+
+const CAKE_PRODUCTS: Product[] = [
   {
     id: 1,
-    title: 'Strawberry Shortcake Signature',
-    seller: 'Chef Jean',
-    sellerContact: '081-234-5678',
-    condition: 'ทำสดใหม่วันต่อวัน',
-    price: '฿590',
-    category: 'เค้กผลไม้',
+    title: 'Strawberry Shortcake ความรักหวานฉ่ำ',
+    price: 590,
+    category: 'สตรอว์เบอร์รี',
     tag: 'ขายดีอันดับ 1',
     rating: 4.9,
-    description: 'สตอเบอรี่สดจากเชียงใหม่ นุ่มละมุนลิ้น ครีมสดแท้จากฝรั่งเศส'
+    imageUrl: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
+    description: 'เนื้อสปันจ์เค้กนุ่มละมุน สลับชั้นครีมสดแท้จากฮอกไกโด และสตรอว์เบอร์รีสดลูกโต',
+    flavors: ['นมฮอกไกโด', 'วานิลลาฝรั่งเศส'],
   },
   {
     id: 2,
-    title: 'Dark Chocolate Fudge Velvet',
-    seller: 'Chef Marco',
-    sellerContact: '082-345-6789',
-    condition: 'ช็อกโกแลตนำเข้า 70%',
-    price: '฿650',
+    title: 'Dark Chocolate Truffle ช็อกโกแลตเข้มข้น',
+    price: 650,
     category: 'ช็อกโกแลต',
-    tag: 'เข้มข้น พรีเมียม',
-    rating: 5.0,
-    description: 'ช็อกโกแลตแท้พรีเมียม เข้มข้น หอมนุ่ม รสชาติกลมกล่อม'
+    tag: 'ช็อกโกแลตแท้ 70%',
+    rating: 4.8,
+    imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
+    description: 'เค้กช็อกโกแลตฟัจด์เข้มข้น แต่งหน้าด้วยช็อกโกแลตทราฟเฟิลทำมือ อร่อยเข้มลงตัว',
+    flavors: ['ดาร์กช็อกโกแลต', 'มินต์ช็อกโกแลต'],
   },
   {
     id: 3,
-    title: 'Matcha Minimalist Birthday',
-    seller: 'Chef Yuki',
-    sellerContact: '083-456-7890',
-    condition: 'มัจฉะแท้จากอุจิ',
-    price: '฿520',
-    category: 'สไตล์เกาหลี',
-    tag: 'สายมินิมอล',
-    rating: 4.8,
-    description: 'เค้กชาเขียวมัจฉะสไตล์มินิมอล หอมชาเขียวแท้ๆ ไม่หวานจัด'
+    title: 'Korean Minimal Pastel Cake',
+    price: 490,
+    category: 'มินิมอลเกาหลี',
+    tag: 'ฮิตใน IG',
+    rating: 5.0,
+    imageUrl: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
+    description: 'เค้กแต่งสไตล์มินิมอลเกาหลี เลือกเขียนข้อความบอกความรู้สึกสุดพิเศษได้ตามใจชอบ',
+    flavors: ['วานิลลาบัตเตอร์', 'ชาไทยพรีเมียม', 'เอิร์ลเกรย์'],
   },
   {
     id: 4,
-    title: 'Basque Burnt Cheesecake',
-    seller: 'Chef Jean',
-    sellerContact: '081-234-5678',
-    condition: 'ครีมชีสแท้ออสเตรเลีย',
-    price: '฿480',
+    title: 'Basque Burnt Cheesecake หน้าไหม้สูตรดั้งเดิม',
+    price: 520,
     category: 'ชีสเค้ก',
-    tag: 'หอมไหม้ละมุน',
+    tag: 'สูตรสเปนแท้',
     rating: 4.9,
-    description: 'ชีสเค้กหน้าไหม้สูตรดั้งเดิม ด้านในเนื้อเยิ้มละลายในปาก'
-  }
+    imageUrl: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80',
+    description: 'ชีสเค้กหน้าไหม้เนื้อเนียนนุ่ม หอมกลิ่นกลมกล่อม ละลายในปาก',
+    flavors: ['ออริจินัลชีส', 'มัทฉะอุจิ'],
+  },
 ]
 
-export default function CakeStudioPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด')
-  const [savedItems, setSavedItems] = useState<number[]>([])
-  const [cart, setCart] = useState<Product[]>([])
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [showOrderModal, setShowOrderModal] = useState(false)
-  const [showBookingModal, setShowBookingModal] = useState(false)
+interface CartItem {
+  product: Product
+  size: string
+  flavor: string
+  customText: string
+  totalPrice: number
+}
 
-  // ฟอร์มจองโต๊ะ
-  const [booking, setBooking] = useState({ name: '', date: '', time: '', guests: '2 ท่าน', phone: '' })
-  const [isBooked, setIsBooked] = useState(false)
+export default function HomePage() {
+  const [activeCategory, setActiveCategory] = useState('ทั้งหมด')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [savedIds, setSavedIds] = useState<number[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isBookingSuccess, setIsBookingSuccess] = useState(false)
 
-  // บันทึกเค้กโปรด
-  const toggleSave = useCallback((id: number) => {
-    setSavedItems((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    )
-  }, [])
+  // Booking Form
+  const [pickupDate, setPickupDate] = useState('')
+  const [customerName, setCustomerName] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
 
-  // เพิ่มลงรายการสั่งซื้อ
-  const handleSelectProduct = (product: Product) => {
-    setSelectedProduct(product)
-    setCart((prev) => [...prev, product])
-    setShowOrderModal(true)
+  const toggleSave = (id: number) => {
+    setSavedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
   }
 
-  // ตัวกรองเค้ก
-  const filteredCakes = INITIAL_CAKES.filter((cake) => {
-    const matchesSearch = cake.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'ทั้งหมด' || cake.category === selectedCategory
-    return matchesSearch && matchesCategory
+  const handleAddToCart = (item: CartItem) => {
+    setCart((prev) => [...prev, item])
+    setIsCartOpen(true)
+  }
+
+  const handleCheckout = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (cart.length === 0) return
+    setIsBookingSuccess(true)
+  }
+
+  const filteredProducts = CAKE_PRODUCTS.filter((p) => {
+    const matchesCat = activeCategory === 'ทั้งหมด' || p.category === activeCategory
+    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCat && matchesSearch
   })
 
-  return (
-    <div className="min-h-screen bg-pink-50/40 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 font-sans pb-24">
-      {/* Header / Banner ร้าน */}
-      <header className="relative bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 text-white py-12 px-6 shadow-xl overflow-hidden">
-        <div className="max-w-6xl mx-auto relative z-10 text-center space-y-3">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
-            <Cake className="w-4 h-4" /> Sweet Studio & Bakery 3D
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight">ร้านเค้กโฮมเมดสไตล์มินิมอล</h1>
-          <p className="text-pink-100 text-sm md:text-base max-w-xl mx-auto">
-            สั่งเค้กวันเกิด คัสตอมข้อความหน้าเค้ก หรือจองโต๊ะจิบชาในบรรยากาศสุดอบอุ่น
-          </p>
+  const grandTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0)
 
-          <div className="pt-2 flex justify-center gap-3">
+  return (
+    <div className="min-h-screen pb-24 max-w-md mx-auto bg-rose-50/30 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 font-sans border-x border-rose-100 dark:border-rose-950">
+      {/* Top Header */}
+      <header className="sticky top-0 z-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-pink-100 dark:border-pink-900/30 p-4 space-y-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Cake className="w-6 h-6 text-pink-500 animate-bounce" />
+            <span className="font-black text-lg bg-gradient-to-r from-pink-500 to-rose-600 bg-clip-text text-transparent">
+              Sweet Bakery Lounge
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <button
-              onClick={() => setShowBookingModal(true)}
-              className="bg-white text-pink-600 hover:bg-pink-50 px-5 py-2.5 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center gap-2 active:scale-95"
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2.5 rounded-2xl bg-pink-50 dark:bg-pink-950/50 text-pink-600 dark:text-pink-300"
             >
-              <Calendar className="w-4 h-4" /> จองโต๊ะทานที่ร้าน
+              <ShoppingBag className="w-5 h-5" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {cart.length}
+                </span>
+              )}
             </button>
           </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-3 text-pink-400" size={16} />
+          <input
+            type="text"
+            placeholder="ค้นหาเค้กวันเกิด, สตรอว์เบอร์รี, ชีสเค้ก..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-pink-50/40 dark:bg-zinc-800/50 border border-pink-200/60 dark:border-pink-900/40 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-pink-400"
+          />
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 mt-8 space-y-8">
-        {/* ช่องค้นหา และหมวดหมู่ */}
-        <section className="space-y-4">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-pink-400" />
-            <input
-              type="text"
-              placeholder="ค้นหาเค้กที่ต้องการ เช่น ช็อกโกแลต, สตอเบอรี่..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white dark:bg-zinc-900 border border-pink-200 dark:border-pink-900/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm"
-            />
+      <main className="p-4 space-y-5">
+        {/* Banner */}
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-pink-400 via-rose-400 to-amber-300 text-white shadow-xl shadow-pink-500/15 relative overflow-hidden">
+          <div className="space-y-1 z-10 relative">
+            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-extrabold uppercase backdrop-blur-md">
+              ✨ สั่งจองเค้กล่วงหน้า 1-2 วัน
+            </span>
+            <h2 className="text-xl font-black">เค้กโฮมเมด ทำสดใหม่ทุกวัน</h2>
+            <p className="text-xs text-pink-50">ฟรี! แต่งหน้าเค้กพิมพ์ข้อความสุดพิเศษ</p>
           </div>
+        </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2 justify-center text-xs">
-            {['ทั้งหมด', 'เค้กผลไม้', 'ช็อกโกแลต', 'สไตล์เกาหลี', 'ชีสเค้ก'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl transition-all whitespace-nowrap font-medium ${
-                  selectedCategory === cat
-                    ? 'bg-pink-500 text-white shadow-md shadow-pink-500/20'
-                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-pink-50'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </section>
+        {/* Categories */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-2xl whitespace-nowrap text-xs font-bold transition-all ${
+                activeCategory === cat
+                  ? 'bg-pink-500 text-white shadow-md shadow-pink-500/20'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-pink-100 dark:border-zinc-800'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-        {/* รายการเค้ก 3D Card */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCakes.map((cake) => (
+        {/* 3D Product Cards */}
+        <div className="grid grid-cols-1 gap-6">
+          {filteredProducts.map((cake) => (
             <Product3DCard
               key={cake.id}
               product={cake}
-              isSaved={savedItems.includes(cake.id)}
+              isSaved={savedIds.includes(cake.id)}
               onToggleSave={toggleSave}
-              onSelect={handleSelectProduct}
+              onAddToCart={handleAddToCart}
             />
           ))}
-        </section>
+        </div>
       </main>
 
-      {/* Modal สรุปออเดอร์เค้ก */}
-      {showOrderModal && selectedProduct && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-pink-100">
-            <div className="flex justify-between items-center border-b pb-3 border-zinc-100">
-              <h2 className="text-lg font-bold flex items-center gap-2 text-pink-600">
-                <ShoppingBag className="w-5 h-5" /> ยืนยันคำสั่งซื้อเค้ก
-              </h2>
-              <button onClick={() => setShowOrderModal(false)} className="text-zinc-400 hover:text-zinc-600">
-                <X className="w-5 h-5" />
+      {/* Booking Drawer Modal */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center p-0">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-3xl p-6 space-y-5 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+            <div className="flex justify-between items-center border-b border-pink-100 dark:border-zinc-800 pb-3">
+              <h3 className="font-black text-lg flex items-center gap-2">
+                <ShoppingBag className="text-pink-500" /> รายการสั่งจองเค้ก ({cart.length})
+              </h3>
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="p-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-700"
+              >
+                <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-zinc-500">เมนูเค้ก:</span>
-                <span className="font-semibold">{selectedProduct.title}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">ราคารวม:</span>
-                <span className="font-bold text-pink-600 text-base">{selectedProduct.price}</span>
-              </div>
-              <div className="bg-pink-50 dark:bg-pink-950/30 p-3 rounded-2xl text-xs text-pink-700 dark:text-pink-300">
-                ✨ ร้านค้าจะเริ่มทำเค้กหลังจากได้รับการยืนยัน ติดต่อเชฟ: {selectedProduct.sellerContact}
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                alert('สั่งซื้อเค้กเรียบร้อยแล้ว! ทางร้านจะจัดส่งให้ตามเวลาครับ')
-                setShowOrderModal(false)
-              }}
-              className="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-2xl shadow-lg transition-all"
-            >
-              ยืนยันการสั่งซื้อ
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal จองโต๊ะทานที่ร้าน */}
-      {showBookingModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h2 className="text-lg font-bold text-pink-600 flex items-center gap-2">
-                <Calendar className="w-5 h-5" /> จองโต๊ะจิบชา & ทานเค้ก
-              </h2>
-              <button onClick={() => setShowBookingModal(false)} className="text-zinc-400 hover:text-zinc-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {isBooked ? (
-              <div className="text-center py-6 space-y-3">
-                <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto animate-bounce" />
-                <h3 className="text-xl font-bold">จองโต๊ะสำเร็จแล้ว!</h3>
-                <p className="text-xs text-zinc-500">เราได้บันทึกการจองสำหรับคุณ {booking.name} เรียบร้อยแล้ว</p>
+            {isBookingSuccess ? (
+              <div className="py-10 text-center space-y-4">
+                <CheckCircle2 size={64} className="mx-auto text-emerald-500 animate-bounce" />
+                <h4 className="text-xl font-black">สั่งจองเค้กสำเร็จแล้ว!</h4>
+                <p className="text-xs text-zinc-500">
+                  ขอบคุณคุณ <span className="font-bold text-pink-600">{customerName}</span> ทางร้านได้รับรายการสั่งจองเรียบร้อยแล้ว จะติดต่อกลับทางเบอร์ {customerPhone} เพื่อยืนยันคิวรับเค้กครับ
+                </p>
                 <button
                   onClick={() => {
-                    setIsBooked(false)
-                    setShowBookingModal(false)
+                    setCart([])
+                    setIsBookingSuccess(false)
+                    setIsCartOpen(false)
                   }}
-                  className="px-6 py-2 bg-pink-500 text-white rounded-xl text-xs font-semibold"
+                  className="w-full py-3 bg-pink-500 text-white rounded-2xl font-bold text-xs"
                 >
-                  ตกลง
+                  กลับสู่หน้าร้านค้า
                 </button>
               </div>
+            ) : cart.length === 0 ? (
+              <div className="py-12 text-center text-zinc-400 space-y-2">
+                <Cake size={40} className="mx-auto opacity-40" />
+                <p className="text-xs">ยังไม่มีรายการเค้กในตะกร้า</p>
+              </div>
             ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  setIsBooked(true)
-                }}
-                className="space-y-3 text-xs"
-              >
-                <div>
-                  <label className="block mb-1 font-medium text-zinc-600">ชื่อผู้จอง</label>
+              <form onSubmit={handleCheckout} className="space-y-4">
+                <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
+                  {cart.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 bg-pink-50/50 dark:bg-zinc-800/50 rounded-2xl flex justify-between items-center text-xs"
+                    >
+                      <div>
+                        <p className="font-bold text-zinc-800 dark:text-zinc-100">{item.product.title}</p>
+                        <p className="text-zinc-500 text-[10px]">
+                          ขนาด: {item.size} | รส: {item.flavor}
+                        </p>
+                        {item.customText && (
+                          <p className="text-pink-600 font-semibold text-[10px]">
+                            ข้อความ: "{item.customText}"
+                          </p>
+                        )}
+                      </div>
+                      <span className="font-black text-rose-600">฿{item.totalPrice.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Form Inputs */}
+                <div className="space-y-3 pt-3 border-t border-pink-100 dark:border-zinc-800">
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    ข้อมูลผู้สั่งจอง & วันรับเค้ก
+                  </h4>
                   <input
-                    required
                     type="text"
-                    placeholder="กรอกชื่อ-นามสกุล"
-                    value={booking.name}
-                    onChange={(e) => setBooking({ ...booking, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-50 border focus:ring-2 focus:ring-pink-400 outline-none"
+                    required
+                    placeholder="ชื่อผู้สั่งจอง..."
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block mb-1 font-medium text-zinc-600">วันที่</label>
+                  <div className="grid grid-cols-2 gap-2">
                     <input
+                      type="tel"
                       required
+                      placeholder="เบอร์โทรศัพท์..."
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
                       type="date"
-                      value={booking.date}
-                      onChange={(e) => setBooking({ ...booking, date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-zinc-50 border focus:ring-2 focus:ring-pink-400 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 font-medium text-zinc-600">เวลา</label>
-                    <input
                       required
-                      type="time"
-                      value={booking.time}
-                      onChange={(e) => setBooking({ ...booking, time: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-zinc-50 border focus:ring-2 focus:ring-pink-400 outline-none"
+                      value={pickupDate}
+                      onChange={(e) => setPickupDate(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
                     />
                   </div>
                 </div>
+
+                <div className="flex justify-between items-center pt-2 font-black text-base">
+                  <span>ราคารวมทั้งหมด:</span>
+                  <span className="text-rose-600 text-xl">฿{grandTotal.toLocaleString()}</span>
+                </div>
+
                 <button
                   type="submit"
-                  className="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-2xl shadow-lg mt-2"
+                  className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-pink-500/30"
                 >
-                  ยืนยันการจองโต๊ะ
+                  ยืนยันการสั่งจองเค้ก
                 </button>
               </form>
             )}
           </div>
         </div>
       )}
-
-      {/* Floating Bottom Nav */}
-      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl border border-pink-100 dark:border-zinc-800 flex items-center gap-8 z-40">
-        <button className="flex flex-col items-center gap-0.5 text-pink-500 font-semibold text-xs">
-          <Cake className="w-5 h-5" />
-          <span>หน้าหลัก</span>
-        </button>
-        <button
-          onClick={() => setShowBookingModal(true)}
-          className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-pink-500 transition-colors text-xs"
-        >
-          <Calendar className="w-5 h-5" />
-          <span>จองโต๊ะ</span>
-        </button>
-        <div className="relative">
-          <button className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-pink-500 transition-colors text-xs">
-            <Heart className="w-5 h-5" />
-            <span>ที่บันทึก ({savedItems.length})</span>
-          </button>
-        </div>
-      </nav>
     </div>
   )
 }
