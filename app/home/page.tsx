@@ -1,647 +1,319 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import Link from 'next/link'
+import { useState, useCallback } from 'react'
+import Product3DCard, { Product } from '@/components/Product3DCard'
 import {
   Search,
-  Bookmark,
+  Cake,
+  Calendar,
+  Clock,
   Sparkles,
-  BookOpen,
-  ArrowUpRight,
-  Check,
-  X,
-  Star,
   ShoppingBag,
-  Eye,
-  Package,
-  QrCode,
-  PhoneCall,
-  LogIn,
-  PlusCircle,
-  Image as ImageIcon,
+  Heart,
+  CheckCircle2,
+  Phone,
+  X,
+  User,
+  MapPin
 } from 'lucide-react'
 
-interface Product {
-  id: number
-  title: string
-  seller: string
-  sellerContact: string
-  condition: string
-  price: string
-  category: string
-  tag: string
-  rating: number
-  imageUrl: string
-  description: string
-  location: string
-}
-
-const CATEGORIES = [
-  'ทั้งหมด',
-  'iPad & Gadgets',
-  'อุปกรณ์ไอที',
-  'หนังสือ & เอกสารเรียน',
-  'เครื่องเขียน & สมุด',
-  'ของใช้ & กระเป๋า',
-]
-
-const INITIAL_PRODUCTS: Product[] = [
+// ข้อมูลเมนูเค้กในร้าน
+const INITIAL_CAKES: Product[] = [
   {
     id: 1,
-    title: 'iPad Air 5 (M1) 64GB Wi-Fi + Apple Pencil 2',
-    seller: 'พี่เกรซ (วิศวะ ปี 4)',
-    sellerContact: '081-XXX-XXXX / Line: grace_eng',
-    condition: 'สภาพ 95% สุขภาพแบต 91%',
-    price: '14,500 บาท',
-    category: 'iPad & Gadgets',
-    tag: 'หลุดจอง/ราคาดี',
+    title: 'Strawberry Shortcake Signature',
+    seller: 'Chef Jean',
+    sellerContact: '081-234-5678',
+    condition: 'ทำสดใหม่วันต่อวัน',
+    price: '฿590',
+    category: 'เค้กผลไม้',
+    tag: 'ขายดีอันดับ 1',
     rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
-    description: 'แถมเคส magnetic และติดฟิล์มกระดาษเรียบร้อยแล้ว พร้อมกล่องและสายชาร์จแท้ นัดรับหน้าตึกกิจกรรมได้เลย',
-    location: 'ใต้ตึกกิจกรรมนักศึกษา (ซุ้ม B01)',
+    description: 'สตอเบอรี่สดจากเชียงใหม่ นุ่มละมุนลิ้น ครีมสดแท้จากฝรั่งเศส'
   },
   {
     id: 2,
-    title: 'Logitech Pebble M350 เมาส์ไร้สาย เสียงเงียบ',
-    seller: 'ตั้ม (บริหาร ปี 3)',
-    sellerContact: 'Line: tum_biz',
-    condition: 'มือสอง สภาพดี 90%',
-    price: '390 บาท',
-    category: 'อุปกรณ์ไอที',
-    tag: 'ของมันต้องมี',
-    rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=600&q=80',
-    description: 'เชื่อมต่อผ่าน Bluetooth / USB Receiver ได้ น้ำหนักเบา เสียงคลิกเงียบมาก เหมาะอ่านหนังสือในห้องสมุด',
-    location: 'โซนไอที หน้าโรงอาหารกลาง',
+    title: 'Dark Chocolate Fudge Velvet',
+    seller: 'Chef Marco',
+    sellerContact: '082-345-6789',
+    condition: 'ช็อกโกแลตนำเข้า 70%',
+    price: '฿650',
+    category: 'ช็อกโกแลต',
+    tag: 'เข้มข้น พรีเมียม',
+    rating: 5.0,
+    description: 'ช็อกโกแลตแท้พรีเมียม เข้มข้น หอมนุ่ม รสชาติกลมกล่อม'
   },
   {
     id: 3,
-    title: 'หนังสือชีทสรุป แคลคูลัส 1 & 2 + ข้อสอบเก่าพร้อมเฉลย',
-    seller: 'ชมรมวิชาการ',
-    sellerContact: 'FB: Academic Club',
-    condition: 'ฉบับปรับปรุงใหม่ 2026',
-    price: '150 บาท',
-    category: 'หนังสือ & เอกสารเรียน',
-    tag: 'Best Seller',
-    rating: 5.0,
-    imageUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80',
-    description: 'สรุปสูตรลับ และลายมือจดละเอียด อ่านเข้าใจง่าย ปูพื้นฐานแน่น เหมาะสำหรับคนเตรียมสอบกลางภาค',
-    location: 'ลานไทร หน้าลานกิจกรรม',
+    title: 'Matcha Minimalist Birthday',
+    seller: 'Chef Yuki',
+    sellerContact: '083-456-7890',
+    condition: 'มัจฉะแท้จากอุจิ',
+    price: '฿520',
+    category: 'สไตล์เกาหลี',
+    tag: 'สายมินิมอล',
+    rating: 4.8,
+    description: 'เค้กชาเขียวมัจฉะสไตล์มินิมอล หอมชาเขียวแท้ๆ ไม่หวานจัด'
   },
+  {
+    id: 4,
+    title: 'Basque Burnt Cheesecake',
+    seller: 'Chef Jean',
+    sellerContact: '081-234-5678',
+    condition: 'ครีมชีสแท้ออสเตรเลีย',
+    price: '฿480',
+    category: 'ชีสเค้ก',
+    tag: 'หอมไหม้ละมุน',
+    rating: 4.9,
+    description: 'ชีสเค้กหน้าไหม้สูตรดั้งเดิม ด้านในเนื้อเยิ้มละลายในปาก'
+  }
 ]
 
-export default function CampusMarketPage() {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS)
-  const [activeCategory, setActiveCategory] = useState('ทั้งหมด')
-  const [searchQuery, setSearchQuery] = useState('')
+export default function CakeStudioPage() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด')
   const [savedItems, setSavedItems] = useState<number[]>([])
-  const [currentTab, setCurrentTab] = useState<'market' | 'explore' | 'saved'>('market')
+  const [cart, setCart] = useState<Product[]>([])
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  
-  // Modal state สำหรับหน้าลงขาย
-  const [isSellModalOpen, setIsSellModalOpen] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newPrice, setNewPrice] = useState('')
-  const [newCategory, setNewCategory] = useState('iPad & Gadgets')
-  const [newSeller, setNewSeller] = useState('')
-  const [newContact, setNewContact] = useState('')
-  const [newLocation, setNewLocation] = useState('')
-  const [newDescription, setNewDescription] = useState('')
-  const [newImageUrl, setNewImageUrl] = useState('')
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [showBookingModal, setShowBookingModal] = useState(false)
 
-  const toggleSave = useCallback((id: number, e?: React.MouseEvent) => {
-    e?.stopPropagation()
+  // ฟอร์มจองโต๊ะ
+  const [booking, setBooking] = useState({ name: '', date: '', time: '', guests: '2 ท่าน', phone: '' })
+  const [isBooked, setIsBooked] = useState(false)
+
+  // บันทึกเค้กโปรด
+  const toggleSave = useCallback((id: number) => {
     setSavedItems((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     )
   }, [])
 
-  const closeModal = useCallback(() => {
-    setSelectedProduct(null)
-    setIsSellModalOpen(false)
-  }, [])
-
-  // ฟังก์ชันเพิ่มสินค้าใหม่ลงในระบบ
-  const handleAddProduct = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const newProduct: Product = {
-      id: Date.now(),
-      title: newTitle,
-      price: newPrice.includes('บาท') ? newPrice : `${newPrice} บาท`,
-      category: newCategory,
-      seller: newSeller || 'นักศึกษา (ไม่ระบุชื่อ)',
-      sellerContact: newContact,
-      location: newLocation || 'นัดรับภายในวิทยาลัย',
-      description: newDescription || 'ไม่มีรายละเอียดเพิ่มเติม',
-      condition: 'มือสอง/พร้อมส่ง',
-      tag: 'สินค้าใหม่',
-      rating: 5.0,
-      imageUrl: newImageUrl || 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80',
-    }
-
-    setProducts([newProduct, ...products])
-    
-    // Reset Form & Close Modal
-    setNewTitle('')
-    setNewPrice('')
-    setNewSeller('')
-    setNewContact('')
-    setNewLocation('')
-    setNewDescription('')
-    setNewImageUrl('')
-    setIsSellModalOpen(false)
-    alert('ลงขายสินค้าเรียบร้อยแล้ว!')
+  // เพิ่มลงรายการสั่งซื้อ
+  const handleSelectProduct = (product: Product) => {
+    setSelectedProduct(product)
+    setCart((prev) => [...prev, product])
+    setShowOrderModal(true)
   }
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal()
-    }
-    if (selectedProduct || isSellModalOpen) {
-      document.body.style.overflow = 'hidden'
-      window.addEventListener('keydown', handleKeyDown)
-    }
-    return () => {
-      document.body.style.overflow = 'auto'
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [selectedProduct, isSellModalOpen, closeModal])
-
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory = activeCategory === 'ทั้งหมด' || product.category === activeCategory
-    const matchesSearch =
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.seller.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    if (currentTab === 'saved') {
-      return savedItems.includes(product.id) && matchesCategory && matchesSearch
-    }
-
-    if (currentTab === 'explore') {
-      return (product.rating >= 4.9 || product.tag.includes('ฮิต') || product.tag.includes('ใหม่')) && matchesCategory && matchesSearch
-    }
-
-    return matchesCategory && matchesSearch
+  // ตัวกรองเค้ก
+  const filteredCakes = INITIAL_CAKES.filter((cake) => {
+    const matchesSearch = cake.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === 'ทั้งหมด' || cake.category === selectedCategory
+    return matchesSearch && matchesCategory
   })
 
   return (
-    <div className="min-h-screen pb-32 max-w-xl mx-auto bg-[#F9F9FB] dark:bg-[#121316] text-[#1D1E20] dark:text-[#ECEEDF] font-sans transition-colors duration-500 relative border-x border-slate-200 dark:border-slate-800">
-      <div className="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
-
-      {/* Header */}
-      <header className="px-5 pt-5 pb-4 space-y-3 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-[#F9F9FB]/95 dark:bg-[#121316]/95 backdrop-blur-md z-20">
-        <div className="flex justify-between items-center">
-          <span className="px-2.5 py-1 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-bold tracking-wider uppercase">
-            Campus Flea Market
-          </span>
-
-          <div className="flex items-center gap-2">
-            {/* ปุ่มลงขาย */}
-            <button
-              onClick={() => setIsSellModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
-            >
-              <PlusCircle size={14} />
-              <span>ลงขาย</span>
-            </button>
-
-            {/* ปุ่มเข้าสู่ระบบ */}
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-95 dark:bg-slate-100 dark:text-slate-900"
-            >
-              <LogIn size={14} />
-              <span>ล็อกอิน</span>
-            </Link>
+    <div className="min-h-screen bg-pink-50/40 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 font-sans pb-24">
+      {/* Header / Banner ร้าน */}
+      <header className="relative bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 text-white py-12 px-6 shadow-xl overflow-hidden">
+        <div className="max-w-6xl mx-auto relative z-10 text-center space-y-3">
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
+            <Cake className="w-4 h-4" /> Sweet Studio & Bakery 3D
           </div>
-        </div>
-
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            ตลาดนัดวิทยาลัย 🛍️
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            ลงขายสินค้าฟรี หรือเลือกซื้ออุปกรณ์การเรียนมือสองราคานักศึกษา
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight">ร้านเค้กโฮมเมดสไตล์มินิมอล</h1>
+          <p className="text-pink-100 text-sm md:text-base max-w-xl mx-auto">
+            สั่งเค้กวันเกิด คัสตอมข้อความหน้าเค้ก หรือจองโต๊ะจิบชาในบรรยากาศสุดอบอุ่น
           </p>
-        </div>
 
-        {/* Search Input */}
-        <div className="relative pt-1">
-          <Search className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ค้นหา ไอแพด, เมาส์, สมุด, ปากกา..."
-            className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-[#1C1D21] border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 transition-all text-slate-800 dark:text-slate-100"
-          />
-          {searchQuery && (
+          <div className="pt-2 flex justify-center gap-3">
             <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              onClick={() => setShowBookingModal(true)}
+              className="bg-white text-pink-600 hover:bg-pink-50 px-5 py-2.5 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center gap-2 active:scale-95"
             >
-              <X size={14} />
+              <Calendar className="w-4 h-4" /> จองโต๊ะทานที่ร้าน
             </button>
-          )}
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="px-5 py-5 space-y-6">
-        {/* Banner */}
-        {currentTab !== 'saved' && (
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md flex items-center justify-between">
-            <div className="space-y-1 z-10">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-[10px] font-bold tracking-wide uppercase backdrop-blur-md">
-                <Sparkles size={10} />
-                <span>เปิดแผงขายของฟรี!</span>
-              </span>
-              <h2 className="text-base font-bold">มีชีทสรุปหรือของไม่ได้ใช้ไหม?</h2>
-              <p className="text-[11px] text-blue-100 opacity-90">
-                กดปุ่ม "ลงขาย" มุมขวาบน เพื่อปล่อยต่อให้เพื่อนๆ ในวิทยาลัยได้เลย
-              </p>
-            </div>
-            <QrCode className="w-12 h-12 text-white/30 shrink-0" />
-          </div>
-        )}
-
-        {/* Category Filters */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
-            <span>หมวดหมู่สินค้า</span>
-            {currentTab === 'saved' && (
-              <span className="text-blue-600 dark:text-blue-400">
-                บันทึกไว้ {savedItems.length} ชิ้น
-              </span>
-            )}
+      <main className="max-w-6xl mx-auto px-4 mt-8 space-y-8">
+        {/* ช่องค้นหา และหมวดหมู่ */}
+        <section className="space-y-4">
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-pink-400" />
+            <input
+              type="text"
+              placeholder="ค้นหาเค้กที่ต้องการ เช่น ช็อกโกแลต, สตอเบอรี่..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white dark:bg-zinc-900 border border-pink-200 dark:border-pink-900/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm"
+            />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-            {CATEGORIES.map((cat) => (
+          <div className="flex gap-2 overflow-x-auto pb-2 justify-center text-xs">
+            {['ทั้งหมด', 'เค้กผลไม้', 'ช็อกโกแลต', 'สไตล์เกาหลี', 'ชีสเค้ก'].map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs font-medium ${
-                  activeCategory === cat
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-[#1C1D21] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-xl transition-all whitespace-nowrap font-medium ${
+                  selectedCategory === cat
+                    ? 'bg-pink-500 text-white shadow-md shadow-pink-500/20'
+                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-pink-50'
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Product List */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {currentTab === 'saved'
-                ? `รายการที่เซฟไว้ (${filteredProducts.length})`
-                : currentTab === 'explore'
-                ? `สินค้ายอดนิยม (${filteredProducts.length})`
-                : `สินค้าทั้งหมด (${filteredProducts.length})`}
-            </h3>
-          </div>
-
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-14 space-y-3 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6">
-              <Package size={36} className="mx-auto text-slate-300 dark:text-slate-700" />
-              <p className="text-xs text-slate-500">
-                {currentTab === 'saved'
-                  ? 'ยังไม่มีสินค้าที่คุณบันทึกไว้'
-                  : 'ยังไม่มีรายการสินค้าในหมวดหมู่นี้'}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {filteredProducts.map((product) => {
-                const isSaved = savedItems.includes(product.id)
-                return (
-                  <div
-                    key={product.id}
-                    className="group relative border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 bg-white dark:bg-[#1A1B1E] hover:shadow-lg transition-all duration-300 flex gap-3.5 items-center"
-                  >
-                    <div
-                      onClick={() => setSelectedProduct(product)}
-                      className="w-24 h-24 shrink-0 relative rounded-xl overflow-hidden cursor-pointer bg-slate-100 dark:bg-slate-800"
-                    >
-                      <img
-                        src={product.imageUrl}
-                        alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Eye size={18} className="text-white drop-shadow-md" />
-                      </div>
-                    </div>
-
-                    <div className="flex-1 space-y-1 pr-5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
-                          {product.tag}
-                        </span>
-                        <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold">
-                          <Star size={10} className="fill-amber-400 text-amber-400" />
-                          <span>{product.rating}</span>
-                        </div>
-                      </div>
-
-                      <h4
-                        onClick={() => setSelectedProduct(product)}
-                        className="font-bold text-sm leading-snug cursor-pointer line-clamp-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      >
-                        {product.title}
-                      </h4>
-
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        ผู้ขาย: <span className="font-medium text-slate-700 dark:text-slate-300">{product.seller}</span>
-                      </p>
-
-                      <div className="pt-1 flex items-center justify-between">
-                        <span className="text-sm font-black text-blue-600 dark:text-blue-400">
-                          {product.price}
-                        </span>
-                        <button
-                          onClick={() => setSelectedProduct(product)}
-                          className="flex items-center gap-0.5 text-[11px] text-slate-600 dark:text-slate-400 hover:text-blue-600 font-medium"
-                        >
-                          รายละเอียด <ArrowUpRight size={12} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={(e) => toggleSave(product.id, e)}
-                      className="absolute top-3.5 right-3.5 p-1 text-slate-400 hover:text-blue-600 transition-colors"
-                    >
-                      {isSaved ? <Check size={18} className="text-emerald-500" /> : <Bookmark size={18} />}
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+        {/* รายการเค้ก 3D Card */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCakes.map((cake) => (
+            <Product3DCard
+              key={cake.id}
+              product={cake}
+              isSaved={savedItems.includes(cake.id)}
+              onToggleSave={toggleSave}
+              onSelect={handleSelectProduct}
+            />
+          ))}
+        </section>
       </main>
 
-      {/* MODAL 1: ป๊อปอัปฟอร์ม "ลงขายสินค้า" */}
-      {isSellModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
-          onClick={closeModal}
-        >
-          <div
-            className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4 my-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-            >
-              <X size={18} />
-            </button>
-
-            <div>
-              <h3 className="text-lg font-bold">ลงขายสินค้าในตลาดนัด 📦</h3>
-              <p className="text-xs text-slate-500">กรอกรายละเอียดเพื่อปล่อยต่อให้เพื่อนในวิทยาลัย</p>
+      {/* Modal สรุปออเดอร์เค้ก */}
+      {showOrderModal && selectedProduct && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-pink-100">
+            <div className="flex justify-between items-center border-b pb-3 border-zinc-100">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-pink-600">
+                <ShoppingBag className="w-5 h-5" /> ยืนยันคำสั่งซื้อเค้ก
+              </h2>
+              <button onClick={() => setShowOrderModal(false)} className="text-zinc-400 hover:text-zinc-600">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">ชื่อสินค้า / อุปกรณ์ *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="เช่น iPad Air 4 64GB / หนังสือแคล 1"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                />
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-zinc-500">เมนูเค้ก:</span>
+                <span className="font-semibold">{selectedProduct.title}</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">ราคา (บาท) *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="เช่น 350 หรือ 12,000"
-                    value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">หมวดหมู่ *</label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                  >
-                    {CATEGORIES.filter((c) => c !== 'ทั้งหมด').map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">ราคารวม:</span>
+                <span className="font-bold text-pink-600 text-base">{selectedProduct.price}</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">ชื่อผู้ขาย/คณะ *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="เช่น นัท (นิเทศ ปี 2)"
-                    value={newSeller}
-                    onChange={(e) => setNewSeller(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">เบอร์/Line ติดต่อ *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Line: nut_nited"
-                    value={newContact}
-                    onChange={(e) => setNewContact(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                  />
-                </div>
+              <div className="bg-pink-50 dark:bg-pink-950/30 p-3 rounded-2xl text-xs text-pink-700 dark:text-pink-300">
+                ✨ ร้านค้าจะเริ่มทำเค้กหลังจากได้รับการยืนยัน ติดต่อเชฟ: {selectedProduct.sellerContact}
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">จุดนัดรับสินค้า *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="เช่น หน้าตึกเรียนรวม / ใต้ตึกกิจกรรม"
-                  value={newLocation}
-                  onChange={(e) => setNewLocation(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">ลิงก์รูปภาพสินค้า (Optional)</label>
-                <div className="relative">
-                  <ImageIcon size={14} className="absolute left-3 top-3 text-slate-400" />
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">รายละเอียดสินค้าเพิ่มเติม</label>
-                <textarea
-                  rows={2}
-                  placeholder="เช่น สภาพ 90%, อุปกรณ์ครบกล่อง, พิมพ์ใหม่..."
-                  value={newDescription}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121316] border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 active:scale-[0.99] pt-2"
-              >
-                ยืนยันลงขายสินค้า
-              </button>
-            </form>
+            <button
+              onClick={() => {
+                alert('สั่งซื้อเค้กเรียบร้อยแล้ว! ทางร้านจะจัดส่งให้ตามเวลาครับ')
+                setShowOrderModal(false)
+              }}
+              className="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-2xl shadow-lg transition-all"
+            >
+              ยืนยันการสั่งซื้อ
+            </button>
           </div>
         </div>
       )}
 
-      {/* MODAL 2: ดูรายละเอียดสินค้า */}
-      {selectedProduct && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={closeModal}
-        >
-          <div
-            className="bg-white dark:bg-[#1A1B1E] text-slate-900 dark:text-slate-100 max-w-md w-full p-5 rounded-3xl shadow-2xl relative space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="flex gap-4 items-start">
-              <img
-                src={selectedProduct.imageUrl}
-                alt={selectedProduct.title}
-                className="w-24 h-24 rounded-2xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-700"
-              />
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                  {selectedProduct.category}
-                </span>
-                <h3 className="text-base font-bold leading-tight">{selectedProduct.title}</h3>
-                <p className="text-xs text-slate-500">
-                  โดย: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedProduct.seller}</span>
-                </p>
-                <div className="text-[11px] font-medium text-amber-600 dark:text-amber-400 pt-0.5">
-                  📌 {selectedProduct.condition}
-                </div>
-              </div>
+      {/* Modal จองโต๊ะทานที่ร้าน */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h2 className="text-lg font-bold text-pink-600 flex items-center gap-2">
+                <Calendar className="w-5 h-5" /> จองโต๊ะจิบชา & ทานเค้ก
+              </h2>
+              <button onClick={() => setShowBookingModal(false)} className="text-zinc-400 hover:text-zinc-600">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="bg-slate-50 dark:bg-[#121316] p-3.5 rounded-2xl space-y-2 text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
-              <div>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">รายละเอียดสินค้า:</span>
-                <p className="leading-relaxed mt-0.5">{selectedProduct.description}</p>
-              </div>
-              <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-200 dark:border-slate-800 space-y-1">
-                <div>📍 <b>จุดนัดรับ:</b> {selectedProduct.location}</div>
-                <div>📞 <b>ช่องทางติดต่อ:</b> {selectedProduct.sellerContact}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <div>
-                <span className="text-[10px] text-slate-400 block uppercase font-bold">ราคาขาย</span>
-                <span className="text-xl font-black text-blue-600 dark:text-blue-400">
-                  {selectedProduct.price}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => toggleSave(selectedProduct.id, e)}
-                  className="p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs flex items-center gap-1 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <Bookmark size={16} />
-                </button>
-
+            {isBooked ? (
+              <div className="text-center py-6 space-y-3">
+                <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto animate-bounce" />
+                <h3 className="text-xl font-bold">จองโต๊ะสำเร็จแล้ว!</h3>
+                <p className="text-xs text-zinc-500">เราได้บันทึกการจองสำหรับคุณ {booking.name} เรียบร้อยแล้ว</p>
                 <button
                   onClick={() => {
-                    alert(`ติดต่อผู้ขาย: ${selectedProduct.seller}\nช่องทาง: ${selectedProduct.sellerContact}`)
+                    setIsBooked(false)
+                    setShowBookingModal(false)
                   }}
-                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-md shadow-blue-500/20"
+                  className="px-6 py-2 bg-pink-500 text-white rounded-xl text-xs font-semibold"
                 >
-                  <PhoneCall size={14} />
-                  <span>ติดต่อคนขาย</span>
+                  ตกลง
                 </button>
               </div>
-            </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setIsBooked(true)
+                }}
+                className="space-y-3 text-xs"
+              >
+                <div>
+                  <label className="block mb-1 font-medium text-zinc-600">ชื่อผู้จอง</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="กรอกชื่อ-นามสกุล"
+                    value={booking.name}
+                    onChange={(e) => setBooking({ ...booking, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-50 border focus:ring-2 focus:ring-pink-400 outline-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block mb-1 font-medium text-zinc-600">วันที่</label>
+                    <input
+                      required
+                      type="date"
+                      value={booking.date}
+                      onChange={(e) => setBooking({ ...booking, date: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-50 border focus:ring-2 focus:ring-pink-400 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium text-zinc-600">เวลา</label>
+                    <input
+                      required
+                      type="time"
+                      value={booking.time}
+                      onChange={(e) => setBooking({ ...booking, time: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-50 border focus:ring-2 focus:ring-pink-400 outline-none"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-2xl shadow-lg mt-2"
+                >
+                  ยืนยันการจองโต๊ะ
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
 
-      {/* Navigation Bar */}
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 w-full max-w-xs px-4">
-        <nav className="flex items-center justify-around py-3 px-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-full shadow-2xl">
-          <button
-            onClick={() => setCurrentTab('market')}
-            className={`flex flex-col items-center gap-1 transition-opacity ${
-              currentTab === 'market' ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <BookOpen size={16} />
-            <span className="text-[9px]">หน้าแรก</span>
+      {/* Floating Bottom Nav */}
+      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl border border-pink-100 dark:border-zinc-800 flex items-center gap-8 z-40">
+        <button className="flex flex-col items-center gap-0.5 text-pink-500 font-semibold text-xs">
+          <Cake className="w-5 h-5" />
+          <span>หน้าหลัก</span>
+        </button>
+        <button
+          onClick={() => setShowBookingModal(true)}
+          className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-pink-500 transition-colors text-xs"
+        >
+          <Calendar className="w-5 h-5" />
+          <span>จองโต๊ะ</span>
+        </button>
+        <div className="relative">
+          <button className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-pink-500 transition-colors text-xs">
+            <Heart className="w-5 h-5" />
+            <span>ที่บันทึก ({savedItems.length})</span>
           </button>
-
-          <button
-            onClick={() => setCurrentTab('explore')}
-            className={`flex flex-col items-center gap-1 transition-opacity ${
-              currentTab === 'explore' ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <Sparkles size={16} />
-            <span className="text-[9px]">ฮิต/มาใหม่</span>
-          </button>
-
-          <button
-            onClick={() => setCurrentTab('saved')}
-            className={`flex flex-col items-center gap-1 transition-opacity relative ${
-              currentTab === 'saved' ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <Bookmark size={16} />
-            <span className="text-[9px]">เซฟไว้</span>
-            {savedItems.length > 0 && (
-              <span className="absolute -top-1 -right-2 w-4 h-4 bg-blue-600 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
-                {savedItems.length}
-              </span>
-            )}
-          </button>
-        </nav>
-      </div>
+        </div>
+      </nav>
     </div>
   )
 }
